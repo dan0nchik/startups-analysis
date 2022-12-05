@@ -5,6 +5,12 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 sns.set_theme()
+hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        </style>
+        """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 
 
