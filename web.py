@@ -19,10 +19,14 @@ st.image('https://about.crunchbase.com/wp-content/uploads/2020/09/crunchbase-cas
 st.markdown("""Crunchbase is the leading destination for company insights from early-stage startups to the Fortune 1000. The dataset from Kaggle describes information scrapped from Crunchbase API.  
 Link to the dataset: https://www.kaggle.com/datasets/arindam235/startup-investments-crunchbase""")
 df = pd.read_csv('cleaned_data.csv', index_col='Unnamed: 0')
-st.title('Some statistics per feature')
+st.title('Some statistics')
 
-with st.expander('View table'):
+with st.expander('View table per feature'):
     st.dataframe(df.describe())
+st.subheader(f"Mean year founded: {round(df['founded_year'].mean())}")
+st.subheader(f"Mean total funding: {'{:,}'.format(int(df['funding_total_usd'].mean()))} $")
+st.subheader(f"Companies dates range from {int(min(df['founded_year']))} to {int(max(df['founded_year']))}")
+st.subheader(f"Standard deviation of seed (first official investment round): {'{:,}'.format(round(df['seed'].std(), 3))} $")
 
 st.title('Overview')
 
