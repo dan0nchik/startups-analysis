@@ -30,7 +30,8 @@ top_spheres = df['market'].value_counts()[:10]
 fig = px.pie(values=top_spheres, names=top_spheres.index, title='Top 10 most expensive markets');
 st.plotly_chart(fig)
 
-fig = px.histogram(df['status'], title='Startups status')
+fig = px.histogram(df['status'], title='Startups status', color_discrete_sequence=["mediumpurple"])
+fig.update_xaxes(categoryorder='total ascending')
 st.plotly_chart(fig)
 st.write("Most startups are operational, and that's good!")
 
@@ -38,10 +39,14 @@ rounds = {}
 for i in df.columns:
     if 'round_' in i:
         rounds[i] = df[i].mean()/10**6
-fig = px.histogram(x=rounds.keys(), y=rounds.values(), labels={'y': 'Investment ($ million)', 'x': 'Rounds'}, title='Investment per round');
+fig = px.histogram(x=rounds.keys(), y=rounds.values(), labels={'y': 'Investment ($ million)', 'x': 'Rounds'}, color_discrete_sequence=["limegreen"]);
 st.plotly_chart(fig)
 
-fig = px.histogram(x=['angel', 'grant', 'venture'], y=[len(df[df['angel']!=0]),len(df[df['grant']!=0]), len(df[df['venture']!=0])], title='Startups investment sources');
+fig = px.histogram(x=['angel', 'grant', 'venture'], 
+                   y=[len(df[df['angel']!=0]),len(df[df['grant']!=0]), len(df[df['venture']!=0])], 
+                   title='Startups investment sources',
+                  color_discrete_sequence=["tomato"]);
+fig.update_xaxes(categoryorder='total ascending')
 st.plotly_chart(fig)
 st.write('This makes sense, because venture capitals are provided by professional investors and give startups way more funding')
 
@@ -63,11 +68,12 @@ st.plotly_chart(fig)
 st.write("No surprise here! Go to the US if you want to raise more money. But **be aware** of the competitors:")
 
 top_companies = df.sort_values(by=['funding_total_usd'], ascending=False)[:25]
-fig = px.histogram(data_frame=top_companies, x='funding_total_usd', 
-y='name', 
-title='Top 25 most successfull companies by year',
+fig = px.histogram(data_frame=top_companies, y='funding_total_usd', 
+x='name', 
+title='Top 25 most successfull companies',
 labels={'x': 'Total funding', 'y': 'Company'}, 
 color='founded_year');
+fig.update_layout(xaxis_categoryorder = 'total descending')
 st.plotly_chart(fig)
 st.write("Seems like company's success doesn't really depend on the year it was founded")
 
@@ -83,7 +89,7 @@ y='debt_financing',
 trendline="ols",
 title='Correlation between debt financing and startup funding')
 st.plotly_chart(fig)
-st.write("Now it's clear that the more money you need for the startup, the more debt_financing you'll need.")
+st.write("Now it's clear that the more money you need for the startup, the more debts you'll need.")
 
 st.markdown("""### Hypothesis: \nEvery year startups need more $$$ to raise. Is that true? 
 Let's calculate total funding by year and make a line plot:""")
@@ -91,7 +97,7 @@ years = set(df['founded_year'])
 fund_by_year = {}
 for year in sorted(years):
     fund_by_year[year] = df[df['founded_year']==year]['funding_total_usd'].sum()/10**9
-fig = px.line(x = fund_by_year.keys(), y=fund_by_year.values(), labels={'x': 'Year', 'y': 'Funding in $ billions'})
+fig = px.line(x = fund_by_year.keys(), y=fund_by_year.values(), labels={'x': 'Year', 'y': 'Funding in $ billions'}, color_discrete_sequence=["darkorange"])
 st.plotly_chart(fig)
 st.write("""From this graph, economic recessions can clearly be seen. In the 1983, [Israel bank stock crisis](https://en.wikipedia.org/wiki/1983_Israel_bank_stock_crisis) 
 hit the market and the banks no longer had the capital to buy back shares and to support the prices causing share prices to collapse. Then, from 1984 to 2007, startups raised more and more $$$ each year, untill the [Global Financial Crisis in 2007](https://en.wikipedia.org/wiki/Financial_crisis_of_2007–2008), the most serious in the 21st century. 
@@ -114,13 +120,13 @@ Thus, choose less popular markets to succeed!""")
 st.markdown("""### Hypothesis: 
 The **seed**(the first official investment round) you raise depends on the **founded quater**.\n
 Are there any 'good' quaters to start your first fund raising?""")
-fig = px.scatter(
-    y=df.sort_values(by='quater')['seed'], 
-    x=df.sort_values(by='quater')['quater'],
-    title='Seed values for various quaters',
-    labels={'x': 'Quater the startup was founded at', 
-    'y': 'Seed capital'})
+fig = px.icicle(
+    df,
+    path=[px.Constant("all"), 'quater'],
+    values='seed',
+    title='Seed values for various quaters')
 st.plotly_chart(fig)
+st.markdown("As we can see, the quater with biggest seed raised is **Q1**! However, we shall check, is that a really popular option? Maybe there's just an outlier there.")
 
 df_by_q_sort = df.sort_values(by='quater')
 num_seed = []
@@ -130,9 +136,10 @@ fig = px.histogram(
     y=num_seed, 
     x=df_by_q_sort['quater'].unique(),
     title='Quater x Seed Number plot',
+    color_discrete_sequence=["teal"],
     labels={'x': 'Quater the startup was founded at', 
-    'y': '  seeds raised'})
+    'y': 'Number of seeds raised'})
 st.plotly_chart(fig)
-st.markdown("""Unfortunately, no. Seed capital seems to depend on other factors. 
-However, **the biggest number** of seeds raised was at the **1st Quater**! That's the most popular time startups raise their first money""")
+st.markdown("""Yes! Q1 is also the most popular option among investors. 
+That's the most popular time startups raise their first money. Thus, the hypothesis is **true**. Make sure you submit an application for seed funding in the 1st Quater.""")
 
